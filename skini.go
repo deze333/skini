@@ -11,26 +11,25 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
-    "path"
+	"path"
 )
 
 // Parses file into provided template.
 // Template can have only maps string to string.
 func Parse(target interface{}, r io.Reader) (err error) {
-    if elem, err := getElem(target); err == nil {
-        return parseInput(&elem, r)
-    }
-    return
+	if elem, err := getElem(target); err == nil {
+		return parseInput(&elem, r)
+	}
+	return
 }
-
 
 // Parses config file with given filename.
 // Returns result as a map of string values.
 func ParseFile(target interface{}, filename string) (err error) {
-    elem, err := getElem(target)
-    if err != nil {
-        return
-    }
+	elem, err := getElem(target)
+	if err != nil {
+		return
+	}
 
 	// Read config file
 	file, err := os.Open(filename)
@@ -44,10 +43,10 @@ func ParseFile(target interface{}, filename string) (err error) {
 
 // Read single field specified by key from input file.
 func SeekFile(target interface{}, filename string, key string) (value string, err error) {
-    elem, err := getElem(target)
-    if err != nil {
-        return
-    }
+	elem, err := getElem(target)
+	if err != nil {
+		return
+	}
 
 	// Read config file
 	file, err := os.Open(filename)
@@ -56,7 +55,7 @@ func SeekFile(target interface{}, filename string, key string) (value string, er
 	}
 	defer file.Close()
 
-    return seekInput(&elem, file, key)
+	return seekInput(&elem, file, key)
 }
 
 // Find first relevant config file in given directory.
@@ -66,7 +65,7 @@ func SeekFile(target interface{}, filename string, key string) (value string, er
 func ParseDir(target interface{}, dir string, pattern string, idkey string, matcher func(string) bool) (err error) {
 	fis, err := ioutil.ReadDir(dir)
 	if err != nil {
-		return fmt.Errorf("error scanning directory: %s", dir)
+		return fmt.Errorf("error scanning directory: %s, error = ", dir, err)
 	}
 
 	// Build pattern regex
@@ -85,17 +84,17 @@ func ParseDir(target interface{}, dir string, pattern string, idkey string, matc
 			continue
 		}
 
-        // Seek file for idkey
-        filename = path.Join(dir, filename)
-        idvalue, err := SeekFile(target, filename, idkey)
-        if err != nil {
-            return fmt.Errorf("Error while seeking file '%s', error: %s", filename, err)
-        }
+		// Seek file for idkey
+		filename = path.Join(dir, filename)
+		idvalue, err := SeekFile(target, filename, idkey)
+		if err != nil {
+			return fmt.Errorf("Error while seeking file '%s', error: %s", filename, err)
+		}
 
-        // Check if idkey value matches expected
-        if matcher(idvalue) {
-            return ParseFile(target, filename)
-        }
+		// Check if idkey value matches expected
+		if matcher(idvalue) {
+			return ParseFile(target, filename)
+		}
 	}
 	return errors.New("No matching configuration file found")
 }
